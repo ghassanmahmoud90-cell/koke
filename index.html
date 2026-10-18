@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KOKE ❤️</title>
+
+<style>
+* {
+	box-sizing: border-box;
+}
+
+body {
+	margin: 0;
+	width: 100%;
+	height: 100vh;
+	height: 100dvh;
+	overflow: hidden;
+	background: #030303;
+	font-family: Arial, sans-serif;
+}
+
+.scene {
+	width: 100%;
+	height: 100%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	position: relative;
+}
+
+#heart {
+	position: relative;
+	width: min(100vw, 100vh);
+	width: min(100vw, 100dvh);
+	height: min(96vh, 96vw);
+	height: min(96dvh, 96vw);
+}
+
+.word {
+	position: absolute;
+	transform: translate(-50%, -50%) scale(.65);
+	white-space: nowrap;
+	color: #ff4141;
+	font-size: clamp(10px, 2.2vw, 17px);
+	font-weight: bold;
+	opacity: 0;
+	text-shadow: 0 0 7px #ff1010, 0 0 14px #a90000;
+	animation: appear .42s ease-out forwards;
+}
+
+@keyframes appear {
+	from {
+		opacity: 0;
+		transform: translate(-50%, -50%) scale(.65);
+	}
+	to {
+		opacity: 1;
+		transform: translate(-50%, -50%) scale(1);
+	}
+}
+
+#koke {
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	transform: translate(-50%, -50%) scale(.5);
+	color: #ffe7a0;
+	font-size: clamp(42px, 11vw, 86px);
+	font-weight: 900;
+	letter-spacing: 5px;
+	white-space: nowrap;
+	opacity: 0;
+	z-index: 5;
+	text-shadow: 0 0 12px #d4af37, 0 0 30px #ffbb00;
+	transition: opacity .8s ease, transform .8s ease;
+}
+
+#koke.visible {
+	opacity: 1;
+	transform: translate(-50%, -50%) scale(1);
+	animation: goldenGlow 2s infinite alternate;
+}
+
+@keyframes goldenGlow {
+	from {
+		text-shadow: 0 0 10px #d4af37, 0 0 20px #a87900;
+	}
+	to {
+		text-shadow: 0 0 18px #fff0ad, 0 0 50px #ffbf00;
+	}
+}
+
+@media (max-width: 500px) {
+	#heart {
+		width: 100vw;
+		height: 95vw;
+	}
+
+	.word {
+		font-size: 10px;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.word {
+		animation-duration: .01s;
+	}
+
+	#koke.visible {
+		animation: none;
+	}
+}
+</style>
+</head>
+
+<body>
+<div class="scene">
+	<div id="heart"></div>
+	<div id="koke">KOKE</div>
+</div>
+
+<script>
+const phrases = [
+	"I love you",
+	"أنا أحبك",
+	"Je t'aime",
+	"Te amo",
+	"Ich liebe dich",
+	"Ti amo",
+	"Eu te amo",
+	"Я тебя люблю",
+	"愛してる",
+	"사랑해",
+	"Seni seviyorum",
+	"Ik hou van jou",
+	"Я кохаю тебе",
+	"Σ' αγαπώ",
+	"Kocham cię",
+	"Te iubesc",
+	"Mahal kita",
+	"أحبك"
+];
+
+const heart = document.getElementById("heart");
+const koke = document.getElementById("koke");
+
+function createHeart() {
+	heart.innerHTML = "";
+	koke.classList.remove("visible");
+
+	const w = heart.clientWidth;
+	const h = heart.clientHeight;
+
+	// Larger heart, fitted to the screen.
+	const scale = Math.min(w / 2.5, h / 2.5);
+	const points = [];
+
+	// Keep phrases along the outline, not packed inside it.
+	for (let t = 0; t < Math.PI * 2; t += 0.105) {
+		const x = 16 * Math.pow(Math.sin(t), 3) / 17;
+		const y = (
+			13 * Math.cos(t)
+			- 5 * Math.cos(2 * t)
+			- 2 * Math.cos(3 * t)
+			- Math.cos(4 * t)
+		) / 17;
+
+		points.push({ x, y });
+	}
+
+	// Begin at the top cleft and move around the heart.
+	points.sort((a, b) => {
+		return Math.atan2(a.x, a.y)
+			 - Math.atan2(b.x, b.y);
+	});
+
+	points.forEach((point, index) => {
+		const word = document.createElement("span");
+		word.className = "word";
+		word.textContent = phrases[index % phrases.length];
+
+		word.style.left =
+			(w / 2 + point.x * scale) + "px";
+
+		word.style.top =
+			(h / 2 - point.y * scale) + "px";
+
+		// Fast, staggered appearance.
+		word.style.animationDelay = (index * 0.018) + "s";
+
+		heart.appendChild(word);
+	});
+
+	const totalDuration = points.length * 18 + 650;
+
+	setTimeout(() => {
+		koke.classList.add("visible");
+	}, totalDuration);
+}
+
+createHeart();
+
+let resizeTimer;
+
+window.addEventListener("resize", () => {
+	clearTimeout(resizeTimer);
+	resizeTimer = setTimeout(createHeart, 200);
+});
+</script>
+</body>
+</html>
